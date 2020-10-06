@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# Internal temp files
+x-drafts/**
+02_DataCreated/x-temp/**
