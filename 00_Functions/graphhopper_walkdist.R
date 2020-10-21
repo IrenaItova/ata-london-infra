@@ -1,7 +1,7 @@
 # Copy of stplanr's route_graphhopper function
 # https://graphhopper.com/api/1/route?point=51.5196408546529%2C-0.0963020630915096&point=51.5061935192932%2C-0.240975652046149&vehicle=foot&locale=en-US&debug=true&points_encoded=false&key=9a5b0e50-7a25-4c03-8eba-b086a3901fe2
 
-graphhopper_walkdist <- function(from, to, vehicle = "foot", startid = NULL, endid = NULL, pat = NULL, base_url = "https://graphhopper.com" ) {
+graphhopper_walkdist <- function(from, to, vehicle = NULL, startid = NULL, endid = NULL, pat = NULL, base_url = "https://graphhopper.com" ) {
   
   # Convert character strings to lon/lat if needs be
   coords <- od_coords(from, to)
