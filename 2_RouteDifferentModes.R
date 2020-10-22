@@ -16,7 +16,7 @@ proj_4326 <- CRS("+proj=longlat +init=epsg:4326")   # global projection - lat/lo
 ####################
 
 # INPUT PARAMETERS
-maxkm <- 3 # maximum distance do routing
+maxkm <- 2 # maximum distance do routing
 
 # LOAD THE CSV EASTING-NORTHING COORDINATES OF OAs
 cents_oa <- read_csv(file.path("01_DataInput/cents_london_oa/OA_2011_London_eastnorth.csv")) # made manually by exporting the points in qgis; https://gis.stackexchange.com/questions/8844/getting-list-of-coordinates-for-points-in-layer-using-qgis
@@ -70,3 +70,17 @@ for (i in 1:nrow(edistdf)){
 }
 write_csv(routedistdf, file.path(paste0("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-",modename,".csv")))
 }
+
+# COMBINE TOGETHER
+combdist <- read_csv(file.path("02_DataCreated/2-route-different-modes/1-edistance-between-pair.csv"))
+footdist <-  read_csv(file.path("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-foot.csv"))
+ combdist <- left_join(combdist, footdist, by = c("startid" = "startid", "endid" = "endid"))
+ combdist <- dplyr::rename(combdist, footdistkm = `routedist`)
+bikedist <-  read_csv(file.path("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-bike.csv"))
+ combdist <- left_join(combdist, bikedist, by = c("startid" = "startid", "endid" = "endid"))
+ combdist <- dplyr::rename(combdist, bikedistkm = `routedist`)
+cardist <-  read_csv(file.path("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-car.csv"))
+ combdist <- left_join(combdist, cardist, by = c("startid" = "startid", "endid" = "endid"))
+ combdist <- dplyr::rename(combdist, cardistkm = `routedist`)
+write_csv(combdist, file.path("02_DataCreated/2-route-different-modes/3-routedistance-between-pair-combined.csv"))
+ 

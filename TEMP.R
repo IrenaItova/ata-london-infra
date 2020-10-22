@@ -25,6 +25,7 @@ edistdf <- read_csv(file.path("02_DataCreated/1-route-mf-2020/1_edistance_to_fil
 
 #TOMORROW
 routedistdf<- read_csv(file.path("02_DataCreated/1-route-mf-2020/2_routedistance_to_filter.csv"))
+#CHECK!
 #routedistdf<- data.frame(startid=character(), endid=character(), routedist=numeric())
 for (i in 20001:nrow(edistdf)){
   startid = edistdf$startid[i]
