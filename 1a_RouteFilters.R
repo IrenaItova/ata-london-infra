@@ -6,7 +6,7 @@ library(stplanr)
 library(tidyverse)
 #library(mapview)
 
-source("00_Functions/graphhopper_walkdist.R")
+source("00_Functions/graphhopper_routedist.R")
 
 proj_27700 <- CRS("+init=epsg:27700")               # UK easting/northing projection - 'projected' (need if working in metres)
 proj_4326 <- CRS("+proj=longlat +init=epsg:4326")   # global projection - lat/long.
@@ -79,7 +79,7 @@ for (i in 1:nrow(edistdf)){
   endid = edistdf$endid[i]
   startpoint <- coordinates(cents_oa[cents_oa@data$OA11CD==startid,]) %>% as.numeric()
   endpoint <- coordinates(cents_filter[cents_filter@data$UID==endid,]) %>% as.numeric()
-  df <- graphhopper_walkdist(from = startpoint, to = endpoint, vehicle = "foot", startid = startid, endid =  endid)
+  df <- graphhopper_routedist(from = startpoint, to = endpoint, vehicle = "foot", startid = startid, endid =  endid)
   routedistdf <- rbind(routedistdf, df)
   if (i %in% seq(1,100000,500)) {  # give a message every 500 rows
     print(paste0(i," at ",Sys.time()))

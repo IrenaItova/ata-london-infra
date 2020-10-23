@@ -1,12 +1,13 @@
 # SET UP
 rm(list = ls())
+library(dplyr)
 library(geojsonio)
 library(rgdal)
 library(stplanr)
 library(tidyverse)
 #library(mapview)
 
-source("00_Functions/graphhopper_walkdist.R")
+source("00_Functions/graphhopper_routedist.R")
 
 proj_27700 <- CRS("+init=epsg:27700")               # UK easting/northing projection - 'projected' (need if working in metres)
 proj_4326 <- CRS("+proj=longlat +init=epsg:4326")   # global projection - lat/long.
@@ -56,22 +57,27 @@ edistdf <- read_csv(file.path("02_DataCreated/2-route-different-modes/1-edistanc
 
 # GRAPH HOPPER ROUTING (NB below min distance could fail?) (NB may need to do this in chunks to keep below day limit, then manually join together)
 for (modename in c("foot", "bike", "car")) {
-routedistdf<- data.frame(startid=character(), endid=character(), routedist=numeric())
+routelist <- list()
 for (i in 1:nrow(edistdf)){
   startid = edistdf$startid[i]
   endid = edistdf$endid[i]
   startpoint <- coordinates(cents_oa[cents_oa@data$OA11CD==startid,]) %>% as.numeric()
   endpoint <- coordinates(cents_oa[cents_oa@data$OA11CD==endid,]) %>% as.numeric()
-  df <- graphhopper_walkdist(from = startpoint, to = endpoint, vehicle = modename, startid = startid, endid =  endid)
-  routedistdf <- rbind(routedistdf, df)
+  routelist[[i]] <- graphhopper_routedist(from = startpoint, to = endpoint, vehicle = modename, startid = startid, endid =  endid, routeshape = T)
   if (i %in% seq(1,100000,500)) {  # give a message every 500 rows
     print(paste0(i," at ",Sys.time()))
   }
 }
-write_csv(routedistdf, file.path(paste0("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-",modename,".csv")))
+routes <- do.call(rbind, routelist) 
+routes <- spTransform(routes, proj_27700)
+#mapview::mapview(routes)
+write_csv(routes@data, file.path(paste0("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-",modename,".csv")))
+geojson_write(routes, file = file.path(paste0("02_DataCreated/2-route-different-modes/2-routes-between-pair-",modename,".geojson")))
 }
 
-# COMBINE TOGETHER
+####################
+# PART 3: COMBINE TOGETHER - CSVS
+####################
 combdist <- read_csv(file.path("02_DataCreated/2-route-different-modes/1-edistance-between-pair.csv"))
 footdist <-  read_csv(file.path("02_DataCreated/2-route-different-modes/2-routedistance-between-pair-foot.csv"))
  combdist <- left_join(combdist, footdist, by = c("startid" = "startid", "endid" = "endid"))
